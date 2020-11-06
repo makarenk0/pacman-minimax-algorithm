@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pacman.AI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +13,7 @@ namespace Pacman
 {
     public class Ghost
     {
-        private const int GhostAmount = 4;
+        private const int GhostAmount = 1;
 
         public int Ghosts = GhostAmount;
         private ImageList GhostImages = new ImageList();
@@ -61,9 +62,9 @@ namespace Pacman
             //timer.Enabled = true;
             //timer.Tick += new EventHandler(timer_Tick);
 
-            killabletimer.Interval = 200;
-            killabletimer.Enabled = false;
-            killabletimer.Tick += new EventHandler(killabletimer_Tick);
+            //killabletimer.Interval = 200;
+            //killabletimer.Enabled = false;
+            //killabletimer.Tick += new EventHandler(killabletimer_Tick);
 
             statetimer.Interval = 10000;
             statetimer.Enabled = false;
@@ -87,6 +88,16 @@ namespace Pacman
             }
             Set_Ghosts();
             ResetGhosts();
+        }
+
+        public Point[] GetGhostsCoordinates()
+        {
+            List<Point> coordinates = new List<Point>();
+            for(int i = 0; i<xCoordinate.Length; i++)
+            {
+                coordinates.Add(new Point(xCoordinate[i], yCoordinate[i]));
+            }
+            return coordinates.ToArray();
         }
 
         public void Set_Ghosts()
@@ -157,66 +168,92 @@ namespace Pacman
             }
         }
 
-        public void UpdateGhosts()
+        public void UpdateGhosts(MultiAgent agent)
         {
             // Keep moving the ghosts
             for (int x = 0; x < Ghosts; x++)
             {
                 if (State[x] > 0) { continue; }
-                MoveGhosts(x);
+                MoveGhosts(x, agent);
             }
             GhostOn = !GhostOn;
             CheckForPacman();
         }
 
-        private void killabletimer_Tick(object sender, EventArgs e)
-        {
-            // Keep moving the ghosts
-            for (int x = 0; x < Ghosts; x++)
-            {
-                if (State[x] != 1) { continue; }
-                MoveGhosts(x);
-            }
-        }
+        //private void killabletimer_Tick(object sender, EventArgs e)
+        //{
+        //    // Keep moving the ghosts
+        //    for (int x = 0; x < Ghosts; x++)
+        //    {
+        //        if (State[x] != 1) { continue; }
+        //        MoveGhosts(x);
+        //    }
+        //}
 
-        private void MoveGhosts(int x)
+        private void MoveGhosts(int x, MultiAgent agent)
         {
+            Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
+            Point nextP = agent.GetEnemyNextPoint(x+1);
+            Direction[x] = Utilities.GetDicrection(currentP, nextP);
+
+
+            switch (Direction[x])
+            {
+                case 1: GhostImage[x].Top -= 16; yCoordinate[x]--; break;
+                case 2: GhostImage[x].Left += 16; xCoordinate[x]++; break;
+                case 3: GhostImage[x].Top += 16; yCoordinate[x]++; break;
+                case 4: GhostImage[x].Left -= 16; xCoordinate[x]--; break;
+            }
+            switch (State[x])
+            {
+                case 0: GhostImage[x].Image = GhostImages.Images[x * 4 + (Direction[x] - 1)]; break;
+                case 1:
+                    if (GhostOn) { GhostImage[x].Image = GhostImages.Images[17]; } else { GhostImage[x].Image = GhostImages.Images[16]; };
+                    break;
+                case 2: GhostImage[x].Image = GhostImages.Images[18]; break;
+            }
+
+
+
+
+
+
             // Move the ghosts
-            if (Direction[x] == 0)
-            {
-                if (ran.Next(0, 5) == 3) { Direction[x] = 1; }
-            }
-            else
-            {
-                bool CanMove = false;
-                Other_Direction(Direction[x], x);
+            //if (Direction[x] == 0)
+            //{
+            //    if (ran.Next(0, 5) == 3) { Direction[x] = 1; }
+            //}
+            //else
+            //{
+            //    bool CanMove = false;
+            //    Other_Direction(Direction[x], x);
 
-                while (!CanMove)
-                {
-                    CanMove = check_direction(Direction[x], x);
-                    if (!CanMove) { Change_Direction(Direction[x], x); }
+            //    while (!CanMove)
+            //    {
+            //        CanMove = check_direction(Direction[x], x);
+            //        if (!CanMove) { Change_Direction(Direction[x], x); }
 
-                }
+            //    }
 
-                if (CanMove)
-                {
-                    switch (Direction[x])
-                    {
-                        case 1: GhostImage[x].Top -= 16; yCoordinate[x]--; break;
-                        case 2: GhostImage[x].Left += 16; xCoordinate[x]++; break;
-                        case 3: GhostImage[x].Top += 16; yCoordinate[x]++; break;
-                        case 4: GhostImage[x].Left -= 16; xCoordinate[x]--; break;
-                    }
-                    switch (State[x])
-                    {
-                        case 0: GhostImage[x].Image = GhostImages.Images[x * 4 + (Direction[x] - 1)]; break;
-                        case 1:
-                            if (GhostOn) { GhostImage[x].Image = GhostImages.Images[17]; } else { GhostImage[x].Image = GhostImages.Images[16]; };
-                            break;
-                        case 2: GhostImage[x].Image = GhostImages.Images[18]; break;
-                    }
-                }
-            }
+            //    if (CanMove)
+            //    {
+            //        switch (Direction[x])
+            //        {
+            //            case 1: GhostImage[x].Top -= 16; yCoordinate[x]--; break;
+            //            case 2: GhostImage[x].Left += 16; xCoordinate[x]++; break;
+            //            case 3: GhostImage[x].Top += 16; yCoordinate[x]++; break;
+            //            case 4: GhostImage[x].Left -= 16; xCoordinate[x]--; break;
+            //        }
+            //        switch (State[x])
+            //        {
+            //            case 0: GhostImage[x].Image = GhostImages.Images[x * 4 + (Direction[x] - 1)]; break;
+            //            case 1:
+            //                if (GhostOn) { GhostImage[x].Image = GhostImages.Images[17]; } else { GhostImage[x].Image = GhostImages.Images[16]; };
+            //                break;
+            //            case 2: GhostImage[x].Image = GhostImages.Images[18]; break;
+            //        }
+            //    }
+            //}
 
         }
 

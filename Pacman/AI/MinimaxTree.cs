@@ -10,13 +10,18 @@ namespace Pacman.AI
     class MinimaxTree
     {
         private int[,] _map;
-        private const int _treeDepth = 5;
+        private const int _treeDepth = 4;
         private int _oneStep;
         private Node _root;
         private Stack<Node> _nodes;
 
         private Point _startPlayerPosition;
         private Point[] _startEnemiesPositions;
+
+        public Node Root { 
+            get => _root; 
+            set => _root = value; 
+        }
 
         public MinimaxTree(int[,] map, Point player, Point[] enemies)
         {
@@ -32,10 +37,10 @@ namespace Pacman.AI
 
         private void ConstructTree()
         {
-            _root = new Node(_startPlayerPosition, 0);
-            _nodes.Push(_root);
+            Root = new Node(_startPlayerPosition, 0);
+            _nodes.Push(Root);
 
-            while (_nodes.Count != 1 && !_nodes.Peek().AllNextVisited())
+            while (!(_nodes.Count == 1 && _nodes.Peek().AllNextVisited()))
             {
                 Node peek = _nodes.Peek();
                 if (!peek.Full)
@@ -59,13 +64,39 @@ namespace Pacman.AI
                 }
                 else  // visited all next nodes -> go back
                 {
-                    if(peek.AgentIndex != 0)  // it is enemy
+                    if(peek.AgentIndex != 0)  // it is min agent
                     {
                         peek.Benefits = FindMinimumBenefit(peek);
+                    }
+                    else // now max agent must make his decision
+                    {
+                        peek.Benefits = FindMaximumBenefit(peek);
                     }
                     _nodes.Pop();
                 }
             }
+            Root.Benefits = FindMaximumBenefit(Root);  //last action for root (root is always max agent)
+
+        }
+
+        public Dictionary<int, List<Point>> GetStepsForEachAgent()
+        {
+            Dictionary<int, List<Point>> agentPoints = new Dictionary<int, List<Point>>();
+            agentPoints.Add(0, new List<Point>());
+            for(int i = 1; i<= _startEnemiesPositions.Length; i++)
+            {
+                agentPoints.Add(i, new List<Point>());
+            }
+
+            Node iteratingNode = Root;
+         
+            while(iteratingNode.NextNodes.Count != 0)
+            {
+                iteratingNode = iteratingNode.NextNodes.Find(x => x.Benefits.SequenceEqual(iteratingNode.Benefits));
+                agentPoints[iteratingNode.AgentIndex].Add(iteratingNode.Coordinate);     
+            }
+
+            return agentPoints;
         }
 
         private List<double> FindMinimumBenefit(Node peek)
@@ -83,6 +114,23 @@ namespace Pacman.AI
                 }
             }
            return new List<double>(peek.NextNodes[index].Benefits);
+        }
+
+        private List<double> FindMaximumBenefit(Node peek)
+        {
+            int index = 0;
+            double maximum = peek.NextNodes[0].Benefits[peek.AgentIndex];
+
+            for (int i = 0; i < peek.NextNodes.Count; i++)
+            {
+                double maybeMax = peek.NextNodes[i].Benefits[peek.AgentIndex];
+                if (maybeMax > maximum)
+                {
+                    maximum = maybeMax;
+                    index = i;
+                }
+            }
+            return new List<double>(peek.NextNodes[index].Benefits);
         }
 
         private void BuildNextNodes(Node peek)
@@ -119,8 +167,10 @@ namespace Pacman.AI
             foreach(var p in possibleSteps)
             {
                 Node newNode = new Node(p, 0);
+
                 newNode.Benefits.Add(BenefitForPlayer(p, previousEnemiesPositions));
                 BenefitsForEnemies(newNode, p, previousEnemiesPositions);
+
                 if(_nodes.Count == _treeDepth * _oneStep)
                 {
                     newNode.Full = true;
@@ -140,11 +190,11 @@ namespace Pacman.AI
         private double BenefitForPlayer(Point p, Point[] previousEnemiesPositions)
         {
             double ben = 0;
-            Point food = FindFood();
+            Point food = FindFood(p);
             ben += (-Distance(p, food));
             foreach(var en in previousEnemiesPositions)
             {
-                ben += Distance(p, en);
+                //ben += Distance(p, en);
             }
             return ben;
         }
@@ -171,19 +221,24 @@ namespace Pacman.AI
 
         }
 
-        private Point FindFood()
+        private Point FindFood(Point p)
         {
+            Point nearest = new Point(-1, -1);
             for (int y = 0; y < _map.GetLength(0); y++)
             {
                 for (int x = 0; x < _map.GetLength(1); x++)
                 {
                     if (_map[y, x] == 1 || _map[y, x] == 3) 
                     {
-                        return new Point(x, y);
+                        if(nearest.X == -1) { nearest = new Point(x, y); }
+                        if(Distance(new Point(x, y), p) < Distance(nearest, p))
+                        {
+                            nearest = new Point(x, y);
+                        }
                     }
                 }
             }
-            return new Point(1, 1);   //TO DO: do normal win
+            return nearest;   //TO DO: do normal win
         }
     }
 }

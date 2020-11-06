@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pacman.AI
 {
-    class Node
+    public class Node
     {
         private int _agentIndex;
 
@@ -22,6 +22,7 @@ namespace Pacman.AI
             AgentIndex = agentIndex;
             Coordinate = new Point(p.X, p.Y);
             NextNodes = new List<Node>();
+            Benefits = new List<double>();
         }
 
         public bool Full 
@@ -54,6 +55,10 @@ namespace Pacman.AI
 
         public bool AllNextVisited()
         {
+            if(NextNodes.Count == 0)
+            {
+                return false;
+            }
             foreach(var node in NextNodes)
             {
                 if (!node.Full)
@@ -74,6 +79,27 @@ namespace Pacman.AI
                 }
             }
             return null;
+        }
+
+
+        public void PrintPretty(string indent, bool last)
+        {
+            Console.Write(indent);
+            if (last)
+            {
+                Console.Write("\\-");
+                indent += "  ";
+            }
+            else
+            {
+                Console.Write("|-");
+                indent += "| ";
+            }
+
+            Console.WriteLine(String.Concat("Ag: ", AgentIndex, " P(", _point.X, " , ", _point.Y, ")", " Benef: (", String.Join(" , ", Benefits.ConvertAll(x => Math.Round(x, 2))), " )"));
+
+            for (int i = 0; i < NextNodes.Count; i++)
+                NextNodes[i].PrintPretty(indent, i == NextNodes.Count - 1);
         }
 
     }

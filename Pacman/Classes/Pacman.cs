@@ -26,6 +26,9 @@ namespace Pacman
 
         private int imageOn = 0;
 
+
+        MultiAgent agents;
+
         public Pacman()
         {
             timer.Interval = 100;
@@ -53,6 +56,8 @@ namespace Pacman
             PacmanImages.Images.Add(Properties.Resources.Pacman_4_3);
 
             PacmanImages.ImageSize = new Size(27,28);
+
+            
         }
 
         public void CreatePacmanImage(Form formInstance, int StartXCoordinate, int StartYCoordinate)
@@ -60,6 +65,11 @@ namespace Pacman
             // Create Pacman Image
             xStart = StartXCoordinate;
             yStart = StartYCoordinate;
+            agents = new MultiAgent(Form1.gameboard.Matrix, new Point(xStart, yStart), Form1.ghost.GetGhostsCoordinates());
+            
+            
+
+
             PacmanImage.Name = "PacmanImage";
             PacmanImage.SizeMode = PictureBoxSizeMode.AutoSize;
             Set_Pacman();
@@ -69,28 +79,56 @@ namespace Pacman
 
         public void MovePacman(int direction)
         {
-            // Move Pacman
-            bool CanMove = check_direction(nextDirection);
-            if (!CanMove) { CanMove = check_direction(currentDirection); direction = currentDirection; } else { direction = nextDirection; }
-            if (CanMove) { currentDirection = direction; }
 
-            if (CanMove)
+
+
+
+
+
+
+
+
+            Point currentP = new Point(xCoordinate, yCoordinate);
+            Point nextP = agents.GetPlayerNextPoint();
+            direction = Utilities.GetDicrection(currentP, nextP);
+
+
+
+
+            switch (direction)
             {
-                switch (direction)
-                {
-                    case 1: PacmanImage.Top -= 16; yCoordinate--; break;
-                    case 2: PacmanImage.Left += 16; xCoordinate++; break;
-                    case 3: PacmanImage.Top += 16; yCoordinate++; break;
-                    case 4: PacmanImage.Left -= 16; xCoordinate--; break;
-                }
-                currentDirection = direction;
-                UpdatePacmanImage();
-                CheckPacmanPosition();
-                Form1.ghost.CheckForPacman();
+                case 1: PacmanImage.Top -= 16; yCoordinate--; break;
+                case 2: PacmanImage.Left += 16; xCoordinate++; break;
+                case 3: PacmanImage.Top += 16; yCoordinate++; break;
+                case 4: PacmanImage.Left -= 16; xCoordinate--; break;
             }
+            currentDirection = direction;
+            UpdatePacmanImage();
+            CheckPacmanPosition();
+            Form1.ghost.CheckForPacman();
+
+            // Move Pacman
+            //bool CanMove = check_direction(nextDirection);
+            //if (!CanMove) { CanMove = check_direction(currentDirection); direction = currentDirection; } else { direction = nextDirection; }
+            //if (CanMove) { currentDirection = direction; }
+
+            //if (CanMove)
+            //{
+            //    switch (direction)
+            //    {
+            //        case 1: PacmanImage.Top -= 16; yCoordinate--; break;
+            //        case 2: PacmanImage.Left += 16; xCoordinate++; break;
+            //        case 3: PacmanImage.Top += 16; yCoordinate++; break;
+            //        case 4: PacmanImage.Left -= 16; xCoordinate--; break;
+            //    }
+            //    currentDirection = direction;
+            //    UpdatePacmanImage();
+            //    CheckPacmanPosition();
+            //    Form1.ghost.CheckForPacman();
+            //}
         }
 
-        private void CheckPacmanPosition()
+            private void CheckPacmanPosition()
         {
             // Check Pacmans position
             switch (Form1.gameboard.Matrix[yCoordinate, xCoordinate])
@@ -132,8 +170,17 @@ namespace Pacman
         private void timer_Tick(object sender, EventArgs e)
         {
             // Keep moving pacman
+            Form1.ghost.UpdateGhosts(agents);
+
+           
+
             MovePacman(currentDirection);
-            Form1.ghost.UpdateGhosts();
+
+            if (agents.TreeIsExhausted)
+            {
+                agents.ConstructMinimaxTree(new Point(xCoordinate, yCoordinate), Form1.ghost.GetGhostsCoordinates());
+            }
+
 
         }
 
@@ -146,6 +193,9 @@ namespace Pacman
             xCoordinate = xStart;
             yCoordinate = yStart;
             PacmanImage.Location = new Point(xStart * 16 - 3, yStart * 16 + 43);
+
+            agents.ConstructMinimaxTree(new Point(xStart, yStart), Form1.ghost.GetGhostsCoordinates());
+            Utilities.PrintTree(agents.GetTreeRoot());
         }
     }
 }
