@@ -59,9 +59,30 @@ namespace Pacman.AI
                 }
                 else  // visited all next nodes -> go back
                 {
+                    if(peek.AgentIndex != 0)  // it is enemy
+                    {
+                        peek.Benefits = FindMinimumBenefit(peek);
+                    }
                     _nodes.Pop();
                 }
             }
+        }
+
+        private List<double> FindMinimumBenefit(Node peek)
+        {
+            int index = 0;
+            double minimum = peek.NextNodes[0].Benefits[peek.AgentIndex];
+            
+            for (int i = 0; i < peek.NextNodes.Count; i++)
+            {
+                double maybeMin = peek.NextNodes[i].Benefits[peek.AgentIndex];
+                if (maybeMin < minimum)
+                {
+                    minimum = maybeMin;
+                    index = i;
+                }
+            }
+           return new List<double>(peek.NextNodes[index].Benefits);
         }
 
         private void BuildNextNodes(Node peek)
