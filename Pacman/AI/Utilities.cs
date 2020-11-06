@@ -22,5 +22,16 @@ namespace Pacman.AI
         {
             root.PrintPretty("", true);
         }
+
+        public static int Heuristic(Point a, Point b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        }
+
+        public static int Cost(Point a, Point b)
+        {
+            return Heuristic(a, b);   //A star algorithm uses distance between two points (because in pacman there is only this option), cost could be any other function in different games etc.
+                                      // (for example cost of going through forest is higher than to goo through plain)
+        }
     }
 }

@@ -31,6 +31,8 @@ namespace Pacman
         private Random ran = new Random();
         private bool GhostOn = false;
 
+        private List<MultiAgent> _ghostAgents;
+
         public Ghost()
         {
             GhostImages.Images.Add(Properties.Resources.Ghost_0_1);
@@ -103,6 +105,7 @@ namespace Pacman
         public void Set_Ghosts()
         {
             // Find Ghost locations
+            _ghostAgents = new List<MultiAgent>();
             int Amount = -1;
             for (int y = 0; y < 30; y++)
             {
@@ -111,6 +114,7 @@ namespace Pacman
                     if (Form1.gameboard.Matrix[y, x] == 15)
                     {
                         Amount++;
+                        _ghostAgents.Add(new MultiAgent(Form1.gameboard.Matrix, FindStartPacman(), new Point[] { new Point(x, y) }));
                         xStart[Amount] = x;
                         yStart[Amount] = y;
                     }
@@ -168,13 +172,13 @@ namespace Pacman
             }
         }
 
-        public void UpdateGhosts(MultiAgent agent)
+        public void UpdateGhosts(Point pacmanP)
         {
             // Keep moving the ghosts
             for (int x = 0; x < Ghosts; x++)
             {
                 if (State[x] > 0) { continue; }
-                MoveGhosts(x, agent);
+                MoveGhosts(x, pacmanP);
             }
             GhostOn = !GhostOn;
             CheckForPacman();
@@ -190,12 +194,19 @@ namespace Pacman
         //    }
         //}
 
-        private void MoveGhosts(int x, MultiAgent agent)
+        private void MoveGhosts(int x, Point pacmanP)
         {
-            Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
-            Point nextP = agent.GetEnemyNextPoint(x+1);
-            Direction[x] = Utilities.GetDicrection(currentP, nextP);
+            //Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
+            //Point nextP = agent.GetEnemyNextPoint(x+1);
+            //Direction[x] = Utilities.GetDicrection(currentP, nextP);
 
+
+            Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
+            
+            _ghostAgents[x].ConstructMinimaxTree(pacmanP, new Point[] { currentP });
+            
+            Point nextP = _ghostAgents[x].GetEnemyNextPoint(1);
+            Direction[x] = Utilities.GetDicrection(currentP, nextP);
 
             switch (Direction[x])
             {
@@ -218,7 +229,7 @@ namespace Pacman
 
 
 
-            // Move the ghosts
+            ////Move the ghosts
             //if (Direction[x] == 0)
             //{
             //    if (ran.Next(0, 5) == 3) { Direction[x] = 1; }
@@ -345,6 +356,22 @@ namespace Pacman
                     }
                 }
             }
+        }
+
+
+        private Point FindStartPacman()
+        {
+            for (int i = 0; i < Form1.gameboard.Matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < Form1.gameboard.Matrix.GetLength(1); j++)
+                {
+                    if (Form1.gameboard.Matrix[i, j] == 3)
+                    {
+                        return new Point(j, i);
+                    }
+                }
+            }
+            return new Point(0, 0);
         }
     }
 }

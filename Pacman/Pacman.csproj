@@ -79,10 +79,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\InformedAlgorithms.cs" />
     <Compile Include="AI\MinimaxTree.cs" />
     <Compile Include="AI\MultiAgent.cs" />
     <Compile Include="AI\Node.cs" />
     <Compile Include="AI\Utilities.cs" />
+    <Compile Include="AI\Vertex.cs" />
     <Compile Include="Classes\Audio.cs" />
     <Compile Include="Classes\Food.cs" />
     <Compile Include="Classes\FormElements.cs" />

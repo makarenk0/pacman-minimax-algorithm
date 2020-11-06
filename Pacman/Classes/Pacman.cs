@@ -170,17 +170,13 @@ namespace Pacman
         private void timer_Tick(object sender, EventArgs e)
         {
             // Keep moving pacman
-            Form1.ghost.UpdateGhosts(agents);
 
-           
+            agents.ConstructMinimaxTree(new Point(xCoordinate, yCoordinate), Form1.ghost.GetGhostsCoordinates());
 
             MovePacman(currentDirection);
 
-            if (agents.TreeIsExhausted)
-            {
-                agents.ConstructMinimaxTree(new Point(xCoordinate, yCoordinate), Form1.ghost.GetGhostsCoordinates());
-            }
 
+            Form1.ghost.UpdateGhosts(new Point(xCoordinate, yCoordinate));
 
         }
 

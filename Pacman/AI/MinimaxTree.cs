@@ -10,7 +10,7 @@ namespace Pacman.AI
     class MinimaxTree
     {
         private int[,] _map;
-        private const int _treeDepth = 4;
+        private const int _treeDepth = 1;
         private int _oneStep;
         private Node _root;
         private Stack<Node> _nodes;
@@ -66,16 +66,16 @@ namespace Pacman.AI
                 {
                     if(peek.AgentIndex != 0)  // it is min agent
                     {
-                        peek.Benefits = FindMinimumBenefit(peek);
+                        peek.Benefits = FindMaximumBenefit(peek);
                     }
                     else // now max agent must make his decision
                     {
-                        peek.Benefits = FindMaximumBenefit(peek);
+                        peek.Benefits = FindMinimumBenefit(peek);
                     }
                     _nodes.Pop();
                 }
             }
-            Root.Benefits = FindMaximumBenefit(Root);  //last action for root (root is always max agent)
+            Root.Benefits = FindMinimumBenefit(Root);  //last action for root (root is always max agent)
 
         }
 
@@ -179,22 +179,21 @@ namespace Pacman.AI
             }
         }
 
-        private void BenefitsForEnemies(Node newNode, Point player, Point[] previousEnemiesPositions)
+        private void BenefitsForEnemies(Node newNode, Point p, Point[] previousEnemiesPositions)
         {
             foreach(var en in previousEnemiesPositions)
             {
-                newNode.Benefits.Add(Distance(player, en));
+                newNode.Benefits.Add((new InformedAlgorithms(en.X, en.Y, p , _map).AStarAlgorithm().Count));
             }
         }
 
         private double BenefitForPlayer(Point p, Point[] previousEnemiesPositions)
         {
             double ben = 0;
-            Point food = FindFood(p);
-            ben += (-Distance(p, food));
+            ben -= (new InformedAlgorithms(p.X, p.Y, FindFood(p), _map).AStarAlgorithm().Count);
             foreach(var en in previousEnemiesPositions)
             {
-                //ben += Distance(p, en);
+                ben += (new InformedAlgorithms(p.X, p.Y, en, _map).AStarAlgorithm().Count);
             }
             return ben;
         }
@@ -228,10 +227,10 @@ namespace Pacman.AI
             {
                 for (int x = 0; x < _map.GetLength(1); x++)
                 {
-                    if (_map[y, x] == 1 || _map[y, x] == 3) 
+                    if (_map[y, x] == 1)
                     {
-                        if(nearest.X == -1) { nearest = new Point(x, y); }
-                        if(Distance(new Point(x, y), p) < Distance(nearest, p))
+                        if (nearest.X == -1) { nearest = new Point(x, y); }
+                        if (Distance(new Point(x, y), p) < Distance(nearest, p))
                         {
                             nearest = new Point(x, y);
                         }
