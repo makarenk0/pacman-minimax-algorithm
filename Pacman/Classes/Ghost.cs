@@ -57,9 +57,9 @@ namespace Pacman
 
             GhostImages.ImageSize = new Size(27, 28);
 
-            timer.Interval = 100;
-            timer.Enabled = true;
-            timer.Tick += new EventHandler(timer_Tick);
+            //timer.Interval = 100;
+            //timer.Enabled = true;
+            //timer.Tick += new EventHandler(timer_Tick);
 
             killabletimer.Interval = 200;
             killabletimer.Enabled = false;
@@ -157,7 +157,7 @@ namespace Pacman
             }
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        public void UpdateGhosts()
         {
             // Keep moving the ghosts
             for (int x = 0; x < Ghosts; x++)
@@ -184,7 +184,7 @@ namespace Pacman
             // Move the ghosts
             if (Direction[x] == 0)
             {
-                if (ran.Next(0, 5) == 3) { Direction[x] = 1;}
+                if (ran.Next(0, 5) == 3) { Direction[x] = 1; }
             }
             else
             {
@@ -211,13 +211,13 @@ namespace Pacman
                     {
                         case 0: GhostImage[x].Image = GhostImages.Images[x * 4 + (Direction[x] - 1)]; break;
                         case 1:
-                            if (GhostOn) { GhostImage[x].Image = GhostImages.Images[17];} else { GhostImage[x].Image = GhostImages.Images[16]; };
+                            if (GhostOn) { GhostImage[x].Image = GhostImages.Images[17]; } else { GhostImage[x].Image = GhostImages.Images[16]; };
                             break;
                         case 2: GhostImage[x].Image = GhostImages.Images[18]; break;
                     }
                 }
             }
-            
+
         }
 
         private bool check_direction(int direction, int ghost)

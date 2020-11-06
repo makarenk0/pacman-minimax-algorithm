@@ -7,7 +7,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{111AF909-187B-476A-84B1-7F68B7DD55FB}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pacman</RootNamespace>
     <AssemblyName>Pacman</AssemblyName>
@@ -79,6 +79,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\MinimaxTree.cs" />
+    <Compile Include="AI\MultiAgent.cs" />
+    <Compile Include="AI\Node.cs" />
     <Compile Include="Classes\Audio.cs" />
     <Compile Include="Classes\Food.cs" />
     <Compile Include="Classes\FormElements.cs" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pacman.AI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -132,6 +133,8 @@ namespace Pacman
         {
             // Keep moving pacman
             MovePacman(currentDirection);
+            Form1.ghost.UpdateGhosts();
+
         }
 
         public void Set_Pacman()
