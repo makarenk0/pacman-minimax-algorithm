@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,6 +33,18 @@ namespace Pacman.AI
         {
             return Heuristic(a, b);   //A star algorithm uses distance between two points (because in pacman there is only this option), cost could be any other function in different games etc.
                                       // (for example cost of going through forest is higher than to goo through plain)
+        }
+
+        public static int ChooseRandomly(int from, int to)
+        {
+            using (RNGCryptoServiceProvider rg = new RNGCryptoServiceProvider())
+            {
+                byte[] rno = new byte[5];
+                rg.GetBytes(rno);
+
+                int n = from + (Math.Abs(BitConverter.ToInt32(rno, 0)) % to);
+                return n;
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Pacman
 {
     public class Ghost
     {
-        private const int GhostAmount = 1;
+        private const int GhostAmount = 2;
 
         public int Ghosts = GhostAmount;
         private ImageList GhostImages = new ImageList();
@@ -200,13 +200,24 @@ namespace Pacman
             //Point nextP = agent.GetEnemyNextPoint(x+1);
             //Direction[x] = Utilities.GetDicrection(currentP, nextP);
 
+            if(Utilities.ChooseRandomly(0, 10) < 2)
+            {
+                bool CanMove = false;
+                while (!CanMove)
+                {
+                    Direction[x] = Utilities.ChooseRandomly(1, 4);
+                    CanMove = check_direction(Direction[x], x);
+                }
+            }
+            else
+            {
+                Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
+                _ghostAgents[x].ConstructMinimaxTree(pacmanP, new Point[] { currentP });
 
-            Point currentP = new Point(xCoordinate[x], yCoordinate[x]);
-            
-            _ghostAgents[x].ConstructMinimaxTree(pacmanP, new Point[] { currentP });
-            
-            Point nextP = _ghostAgents[x].GetEnemyNextPoint(1);
-            Direction[x] = Utilities.GetDicrection(currentP, nextP);
+                Point nextP = _ghostAgents[x].GetEnemyNextPoint(1);
+                Direction[x] = Utilities.GetDicrection(currentP, nextP);
+            }
+           
 
             switch (Direction[x])
             {

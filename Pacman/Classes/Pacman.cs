@@ -31,7 +31,7 @@ namespace Pacman
 
         public Pacman()
         {
-            timer.Interval = 100;
+            timer.Interval = 300;
             timer.Enabled = true;
             timer.Tick += new EventHandler(timer_Tick);
 

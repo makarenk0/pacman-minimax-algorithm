@@ -190,12 +190,16 @@ namespace Pacman.AI
         private double BenefitForPlayer(Point p, Point[] previousEnemiesPositions)
         {
             double ben = 0;
-            ben -= (new InformedAlgorithms(p.X, p.Y, FindFood(p), _map).AStarAlgorithm().Count);
+            double nearestFood = (new InformedAlgorithms(p.X, p.Y, FindFood(p), _map).AStarAlgorithm().Count);
+
+            List<double> enemiesDistance = new List<double>();
             foreach(var en in previousEnemiesPositions)
             {
-                ben += (new InformedAlgorithms(p.X, p.Y, en, _map).AStarAlgorithm().Count);
+                enemiesDistance.Add(new InformedAlgorithms(p.X, p.Y, en, _map).AStarAlgorithm().Count);
             }
-            return ben;
+            ben = enemiesDistance.Max();
+
+            return ben > nearestFood ? ben : -nearestFood;
         }
 
         private double Distance(Point p1, Point p2)
